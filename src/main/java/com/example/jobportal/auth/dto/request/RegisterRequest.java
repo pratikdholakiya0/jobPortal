@@ -19,5 +19,5 @@ public class RegisterRequest {
     private String password;
 
     @NotNull(message = "User role is required")
-    private Role userRole;
+    private Role role;
 }

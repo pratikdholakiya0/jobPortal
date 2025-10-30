@@ -1,5 +1,7 @@
 package com.example.jobportal.auth.service;
 
+import com.example.jobportal.user.enums.Role;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,14 +9,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @Getter
+@Builder
 public class JobPortalUserPrincipal implements UserDetails {
 
     private final String userId;
     private final String profileId;
-    private final String candidateProfileId;
+    private final String resumeId;
     private final String companyId;
     private final String username;
     private final String password;
+    private final Role role;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public JobPortalUserPrincipal(
@@ -23,14 +27,17 @@ public class JobPortalUserPrincipal implements UserDetails {
             String candidateProfileId,
             String companyId,
             String username,
+            String password,
+            Role role,
             Collection<? extends GrantedAuthority> authorities
     ){
         this.userId = userId;
         this.profileId = profileId;
-        this.candidateProfileId = candidateProfileId;
+        this.resumeId = candidateProfileId;
         this.companyId = companyId;
         this.username = username;
-        this.password = null;
+        this.password = password;
+        this.role = role;
         this.authorities = authorities;
     }
 

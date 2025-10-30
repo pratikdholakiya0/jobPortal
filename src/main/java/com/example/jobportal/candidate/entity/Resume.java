@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Document(collection = "candidate_profiles")
-public class CandidateProfile {
+public class Resume {
     @Id
     private String id;
     @Indexed(unique = true)

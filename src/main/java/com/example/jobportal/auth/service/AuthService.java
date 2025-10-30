@@ -2,6 +2,8 @@ package com.example.jobportal.auth.service;
 
 import com.example.jobportal.auth.dto.request.LoginRequest;
 import com.example.jobportal.auth.dto.request.RegisterRequest;
+import com.example.jobportal.exeptionHandler.customException.InvalidCredentials;
+import com.example.jobportal.exeptionHandler.customException.UserNotFound;
 import com.example.jobportal.user.entity.User;
 import com.example.jobportal.user.repository.UserRepository;
 import com.example.jobportal.util.Jwtutil;
@@ -32,7 +34,7 @@ public class AuthService {
         User user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(registerRequest.getUserRole())
+                .role(registerRequest.getRole())
                 .creationDate(new Date(System.currentTimeMillis()))
                 .build();
         userRepository.save(user);
@@ -46,7 +48,7 @@ public class AuthService {
                             loginRequest.getPassword())
             );
         }catch (Exception e){
-            throw new UsernameNotFoundException("Invalid email or password");
+            throw new InvalidCredentials("Invalid email or password");
         }
         return jwtutil.generateToken(loginRequest.getEmail());
     }

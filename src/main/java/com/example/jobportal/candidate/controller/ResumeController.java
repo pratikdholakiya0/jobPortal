@@ -1,24 +1,23 @@
 package com.example.jobportal.candidate.controller;
 
-import com.example.jobportal.candidate.entity.CandidateProfile;
-import com.example.jobportal.candidate.service.CandidateProfileService;
+import com.example.jobportal.candidate.entity.Resume;
+import com.example.jobportal.candidate.service.ResumeService;
 import com.example.jobportal.user.dto.ResponseMessage; // Assuming this DTO exists for status messages
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/candidate/resume")
-public class CandidateProfileController {
+public class ResumeController {
 
     @Autowired
-    private CandidateProfileService candidateProfileService;
+    private ResumeService candidateProfileService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseMessage> createProfile(@RequestBody CandidateProfile candidateProfile) {
-        CandidateProfile profile = candidateProfileService.createCandidateProfile(candidateProfile);
+    public ResponseEntity<ResponseMessage> createProfile(@RequestBody Resume candidateProfile) {
+        Resume profile = candidateProfileService.createCandidateProfile(candidateProfile);
 
         ResponseMessage responseMessage = ResponseMessage.builder()
                 .message("Candidate profile created successfully.")
@@ -27,14 +26,14 @@ public class CandidateProfileController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<CandidateProfile> getResume() {
-        CandidateProfile profile = candidateProfileService.getResume();
+    public ResponseEntity<Resume> getResume() {
+        Resume profile = candidateProfileService.getResume();
         return ResponseEntity.ok(profile);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ResponseMessage> updateProfile(@RequestBody CandidateProfile candidateProfile) {
-        CandidateProfile updatedProfile = candidateProfileService.updateCandidateProfile(candidateProfile);
+    public ResponseEntity<ResponseMessage> updateProfile(@RequestBody Resume candidateProfile) {
+        Resume updatedProfile = candidateProfileService.updateCandidateProfile(candidateProfile);
 
         ResponseMessage responseMessage = ResponseMessage.builder()
                 .message("Candidate profile updated successfully.")

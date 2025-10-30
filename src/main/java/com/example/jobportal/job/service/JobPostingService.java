@@ -1,5 +1,6 @@
 package com.example.jobportal.job.service;
 
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
 import com.example.jobportal.company.entity.Company;
 import com.example.jobportal.company.repository.CompanyRepository;
 import com.example.jobportal.exeptionHandler.customException.CompanyNotFound;
@@ -7,7 +8,6 @@ import com.example.jobportal.exeptionHandler.customException.JobPostNotFound;
 import com.example.jobportal.job.dto.JobPostingDto;
 import com.example.jobportal.job.entity.JobPosting;
 import com.example.jobportal.job.repository.JobPostingRepository;
-import com.example.jobportal.user.entity.User;
 import com.example.jobportal.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,11 +30,18 @@ public class JobPostingService {
     @Autowired
     private UserRepository userRepository;
 
-    private String getCurrentUserId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.getUserByEmail(email);
+    private JobPortalUserPrincipal getPrincipal() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return user.getId();
+        if (principal instanceof JobPortalUserPrincipal) {
+            return (JobPortalUserPrincipal) principal;
+        }
+
+        throw new AccessDeniedException("User authentication context is invalid or incomplete.");
+    }
+
+    public String getCurrentUserId(){
+        return getPrincipal().getUserId();
     }
 
     public JobPosting createJobPosting(JobPostingDto jobPostingDto) {

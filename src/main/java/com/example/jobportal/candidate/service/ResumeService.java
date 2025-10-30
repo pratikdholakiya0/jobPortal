@@ -1,43 +1,53 @@
 package com.example.jobportal.candidate.service;
 
-import com.example.jobportal.candidate.entity.CandidateProfile;
-import com.example.jobportal.candidate.repository.CandidateProfileRepository;
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
+import com.example.jobportal.candidate.entity.Resume;
+import com.example.jobportal.candidate.repository.ResumeRepository;
 import com.example.jobportal.exeptionHandler.customException.CandidateProfileAlreadyCreated;
 import com.example.jobportal.exeptionHandler.customException.CandidateProfileNotCreated;
 import com.example.jobportal.user.entity.User;
 import com.example.jobportal.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class CandidateProfileService {
+public class ResumeService {
     @Autowired
-    private CandidateProfileRepository candidateProfileRepository;
+    private ResumeRepository resumeRepository;
 
     @Autowired
     private UserRepository userRepository;
 
-    private String getCurrentUserId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findUserByEmail(email);
-        return user.getId();
+    private JobPortalUserPrincipal getPrincipal() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof JobPortalUserPrincipal) {
+            return (JobPortalUserPrincipal) principal;
+        }
+
+        throw new AccessDeniedException("User authentication context is invalid or incomplete.");
     }
 
-    public CandidateProfile createCandidateProfile(CandidateProfile candidateProfile) {
+    private String getCurrentUserId() {
+        return getPrincipal().getUserId();
+    }
+
+    public Resume createCandidateProfile(Resume candidateProfile) {
         String userId = getCurrentUserId();
-        CandidateProfile candidateProfileEntity = candidateProfileRepository.findCandidateProfileByUserId(userId);
+        Resume candidateProfileEntity = resumeRepository.getResumeByUserId(userId);
         if (candidateProfileEntity != null) throw new CandidateProfileAlreadyCreated("Candidate Profile has benn Already Created");
 
         candidateProfile.setUserId(userId);
-        return candidateProfileRepository.save(candidateProfile);
+        return resumeRepository.save(candidateProfile);
     }
 
-    public CandidateProfile updateCandidateProfile(CandidateProfile candidateProfile) {
+    public Resume updateCandidateProfile(Resume candidateProfile) {
         String userId = getCurrentUserId();
-        CandidateProfile candidateProfileEntity = candidateProfileRepository.findCandidateProfileByUserId(userId);
+        Resume candidateProfileEntity = resumeRepository.getResumeByUserId(userId);
         if (candidateProfileEntity == null) throw new CandidateProfileNotCreated("Candidate profile is not created yet of user : "+ userId);
 
         if (candidateProfile.getBio() != null) candidateProfileEntity.setBio(candidateProfile.getBio());
@@ -45,12 +55,12 @@ public class CandidateProfileService {
         if (candidateProfile.getSkillList() != null) candidateProfileEntity.setSkillList(candidateProfile.getSkillList());
         if (candidateProfile.getExperienceList() != null) candidateProfileEntity.setExperienceList(candidateProfile.getExperienceList());
 
-        return candidateProfileRepository.save(candidateProfileEntity);
+        return resumeRepository.save(candidateProfileEntity);
     }
 
-    public CandidateProfile getResume() {
+    public Resume getResume() {
         String userId = getCurrentUserId();
-        Optional<CandidateProfile> existingProfileOpt = candidateProfileRepository.findByUserId(userId);
+        Optional<Resume> existingProfileOpt = resumeRepository.findByUserId(userId);
         if (existingProfileOpt.isPresent()) {
             return existingProfileOpt.get();
         }

@@ -1,12 +1,16 @@
 package com.example.jobportal.user.service;
 
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
+import com.example.jobportal.exeptionHandler.customException.CandidateProfileNotCreated;
 import com.example.jobportal.user.dto.ProfileRequest;
 import com.example.jobportal.user.entity.Profile;
 import com.example.jobportal.user.entity.User;
 import com.example.jobportal.user.repository.ProfileRepository;
 import com.example.jobportal.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +24,23 @@ public class ProfileService {
     @Autowired
     private ProfileRepository profileRepository;
 
+    private JobPortalUserPrincipal getPrincipal() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof JobPortalUserPrincipal) {
+            return (JobPortalUserPrincipal) principal;
+        }
+
+        throw new AccessDeniedException("User authentication context is invalid or incomplete.");
+    }
+
+    public String getCurrentUserId(){
+        return getPrincipal().getUserId();
+    }
+
     @Transactional
     public Profile buildProfile(ProfileRequest profile){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User user = userRepository.getUserByEmail(email);
+        User user = userRepository.getUserById(getCurrentUserId());
         user.setActive(true);
         userRepository.save(user);
 
@@ -42,9 +57,7 @@ public class ProfileService {
     }
 
     public Profile updateProfile(ProfileRequest profile){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Profile profileDb = profileRepository.getProfileByEmail(email);
+        Profile profileDb = profileRepository.getProfileByUserId(getCurrentUserId());
 
         if (profile.getFirstName() == null || !profile.getFirstName().isEmpty()) profileDb.setFirstName(profile.getFirstName());
         if (profile.getLastName() == null || !profile.getLastName().isEmpty()) profileDb.setLastName(profile.getLastName());
@@ -57,8 +70,6 @@ public class ProfileService {
     }
 
     public Profile getProfile(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return profileRepository.getProfileByEmail(email);
+        return profileRepository.getProfileByUserId(getCurrentUserId());
     }
 }

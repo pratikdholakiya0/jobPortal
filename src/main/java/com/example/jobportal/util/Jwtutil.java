@@ -1,11 +1,10 @@
 package com.example.jobportal.util;
 
 import com.example.jobportal.auth.service.JobPortalUserPrincipal;
-import com.example.jobportal.candidate.entity.CandidateProfile;
-import com.example.jobportal.candidate.repository.CandidateProfileRepository;
+import com.example.jobportal.candidate.entity.Resume;
+import com.example.jobportal.candidate.repository.ResumeRepository;
 import com.example.jobportal.company.entity.Company;
 import com.example.jobportal.company.repository.CompanyRepository;
-import com.example.jobportal.filter.JwtFilter;
 import com.example.jobportal.user.entity.Profile;
 import com.example.jobportal.user.entity.User;
 import com.example.jobportal.user.repository.ProfileRepository;
@@ -21,7 +20,6 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class Jwtutil {
@@ -39,39 +37,14 @@ public class Jwtutil {
     private ProfileRepository profileRepository;
 
     @Autowired
-    private CandidateProfileRepository candidateProfileRepository;
+    private ResumeRepository resumeRepository;
 
     @Autowired
     private CompanyRepository companyRepository;
 
     public String generateToken(String username){
-        Map<String, Object> claims = generateClaims(username);
-        return createToken(claims, username);
-    }
-
-    private Map<String, Object> generateClaims(String username){
         Map<String, Object> claims = new HashMap<>();
-
-        User user = userRepository.getUserByEmail(username);
-        Profile profile = profileRepository.getProfileByUserId(user.getId());
-        CandidateProfile candidateProfile = candidateProfileRepository.getCandidateProfileByUserId(user.getId());
-        Company company = companyRepository.findCompanyByUserId(user.getId());
-
-        claims.put("userId", user.getId());
-        if (profile!=null) claims.put("profileId", profile.getId());
-        if (candidateProfile!=null) claims.put("candidateProfileId", candidateProfile.getId());
-        if (company!=null) claims.put("companyId", company.getId());
-
-        String userId =  user.getId();
-        String profileId =  profile!=null ? profile.getId() : "";
-        String candidateProfileId =  candidateProfile!=null ? candidateProfile.getId() : "";
-        String companyId =  company!=null ? company.getId() : "";
-
-        JobPortalUserPrincipal principal = new JobPortalUserPrincipal(
-                userId, profileId, candidateProfileId, companyId, username,
-                null
-        );
-        return claims;
+        return createToken(claims, username);
     }
 
     private String createToken(Map<String, Object> claims, String username){

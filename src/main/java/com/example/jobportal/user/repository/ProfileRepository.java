@@ -9,4 +9,6 @@ public interface ProfileRepository extends MongoRepository<Profile, String> {
     Profile getProfileByEmail(String email);
 
     Profile getProfileByUserId(String userId);
+
+    Profile getProfileById(String id);
 }

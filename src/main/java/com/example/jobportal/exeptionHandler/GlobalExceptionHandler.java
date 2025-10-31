@@ -22,6 +22,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(CandidateProfileNotCreated.class)
+    public ResponseEntity<ErrorMessage> candidateProfileNotCreatedException(CandidateProfileNotCreated e) {
+        ErrorMessage errorMessage = ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.FORBIDDEN)
+                .timestamp(new Date(System.currentTimeMillis())).build();
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ApplicationNotApplied.class)
+    public ResponseEntity<ErrorMessage> applicationNotApplied(ApplicationNotApplied e) {
+        ErrorMessage errorMessage = ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.NOT_FOUND)
+                .timestamp(new Date(System.currentTimeMillis()))
+                .build();
+        return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(InvalidCredentials.class)
     public ResponseEntity<String> handleInvalidCredentials(InvalidCredentials ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);

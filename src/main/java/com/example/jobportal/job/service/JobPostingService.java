@@ -1,5 +1,6 @@
 package com.example.jobportal.job.service;
 
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
 import com.example.jobportal.company.entity.Company;
 import com.example.jobportal.company.repository.CompanyRepository;
 import com.example.jobportal.exeptionHandler.customException.CompanyNotFound;
@@ -28,29 +29,20 @@ public class JobPostingService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public JobPosting createJobPosting(JobPostingDto jobPostingDto, JobPortalUserPrincipal principal) {
+        String companyId = principal.getCompanyId();
 
-    private String getCurrentUserId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.getUserByEmail(email);
-
-        return user.getId();
-    }
-
-    public JobPosting createJobPosting(JobPostingDto jobPostingDto) {
-        String userId = getCurrentUserId();
-        Company company = companyRepository.findCompanyByUserId(userId);
-        if (company == null) throw new CompanyNotFound("This user does not own any company");
+        if (companyId == null) throw new CompanyNotFound("This user does not own any company");
 
         JobPosting jobPosting = JobPosting.builder()
-                .companyId(company.getId())
+                .companyId(companyId)
                 .title(jobPostingDto.getTitle())
                 .description(jobPostingDto.getDescription())
                 .locationType(jobPostingDto.getLocationType())
                 .city(jobPostingDto.getCity())
                 .employmentType(jobPostingDto.getEmploymentType())
                 .salaryRange(jobPostingDto.getSalaryRange())
+                .postedDate(new Date(System.currentTimeMillis()))
                 .deadline(jobPostingDto.getDeadline())
                 .isActive(true)
                 .isApproved(false)
@@ -58,14 +50,13 @@ public class JobPostingService {
         return jobPostingRepository.save(jobPosting);
     }
 
-    public JobPosting updateJobPosting(String jobId,JobPostingDto jobPostingDto) {
-        String userId = getCurrentUserId();
-        Company company = companyRepository.findCompanyByUserId(userId);
+    public JobPosting updateJobPosting(String jobId,JobPostingDto jobPostingDto, JobPortalUserPrincipal principal) {
+        String companyId = principal.getCompanyId();
 
         JobPosting jobPosting = jobPostingRepository.findJobPostingById(jobId);
         if (jobPosting == null) throw new JobPostNotFound("Job posting not found");
 
-        if (!jobPosting.getCompanyId().equals(company.getId())){
+        if (!jobPosting.getCompanyId().equals(companyId)){
             throw new AccessDeniedException("You are not authorized to update this job posting.");
         }
 

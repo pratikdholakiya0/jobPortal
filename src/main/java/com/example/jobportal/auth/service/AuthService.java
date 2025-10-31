@@ -32,7 +32,7 @@ public class AuthService {
         User user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(registerRequest.getUserRole())
+                .role(registerRequest.getRole())
                 .creationDate(new Date(System.currentTimeMillis()))
                 .build();
         userRepository.save(user);

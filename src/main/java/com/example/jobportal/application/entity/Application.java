@@ -22,7 +22,7 @@ public class Application {
     private String id;
 
     @NotBlank
-    private String candidateProfileId;
+    private String userId;
 
     @NotBlank
     private String companyId;

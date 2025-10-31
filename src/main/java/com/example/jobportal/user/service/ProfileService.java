@@ -1,5 +1,6 @@
 package com.example.jobportal.user.service;
 
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
 import com.example.jobportal.user.dto.ProfileRequest;
 import com.example.jobportal.user.entity.Profile;
 import com.example.jobportal.user.entity.User;
@@ -21,11 +22,10 @@ public class ProfileService {
     private ProfileRepository profileRepository;
 
     @Transactional
-    public Profile buildProfile(ProfileRequest profile){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+    public Profile buildProfile(ProfileRequest profile, JobPortalUserPrincipal principal){
+        String userId = principal.getUserId();
 
-        User user = userRepository.getUserByEmail(email);
+        User user = userRepository.findUserById(userId);
         user.setActive(true);
         userRepository.save(user);
 
@@ -41,10 +41,9 @@ public class ProfileService {
         return profileRepository.save(profileDb);
     }
 
-    public Profile updateProfile(ProfileRequest profile){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Profile profileDb = profileRepository.getProfileByEmail(email);
+    public Profile updateProfile(ProfileRequest profile, JobPortalUserPrincipal principal){
+        String profileId = profile.getId();
+        Profile profileDb = profileRepository.getProfileById(profileId);
 
         if (profile.getFirstName() == null || !profile.getFirstName().isEmpty()) profileDb.setFirstName(profile.getFirstName());
         if (profile.getLastName() == null || !profile.getLastName().isEmpty()) profileDb.setLastName(profile.getLastName());
@@ -56,9 +55,7 @@ public class ProfileService {
         return profileRepository.save(profileDb);
     }
 
-    public Profile getProfile(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return profileRepository.getProfileByEmail(email);
+    public Profile getProfile(JobPortalUserPrincipal principal){
+        return profileRepository.getProfileByUserId(principal.getUserId());
     }
 }

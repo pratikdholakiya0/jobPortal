@@ -1,5 +1,6 @@
 package com.example.jobportal.job.controller;
 
+import com.example.jobportal.auth.service.JobPortalUserPrincipal;
 import com.example.jobportal.job.dto.JobPostingDto;
 import com.example.jobportal.job.entity.JobPosting;
 import com.example.jobportal.job.service.JobPostingService;
@@ -7,6 +8,8 @@ import com.example.jobportal.user.dto.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +22,13 @@ public class JobPostingController {
     private JobPostingService jobPostingService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseMessage> createJobPosting(@RequestBody JobPostingDto jobPostingDto) {
-        JobPosting jobPosting = jobPostingService.createJobPosting(jobPostingDto);
+    public ResponseEntity<ResponseMessage> createJobPosting(
+            @RequestBody JobPostingDto jobPostingDto,
+            @AuthenticationPrincipal JobPortalUserPrincipal principal) {
+
+        if (principal == null) throw new AccessDeniedException("Authentication required to create job profile.");
+
+        JobPosting jobPosting = jobPostingService.createJobPosting(jobPostingDto, principal);
 
         ResponseMessage responseMessage = ResponseMessage.builder()
                 .message("Job post created")
@@ -31,9 +39,12 @@ public class JobPostingController {
     @PutMapping("update/{jobId}")
     public ResponseEntity<ResponseMessage> updateJobPosting(
             @PathVariable String jobId,
-            @RequestBody JobPostingDto jobPostingUpdates) {
+            @RequestBody JobPostingDto jobPostingUpdates,
+            @AuthenticationPrincipal JobPortalUserPrincipal principal) {
 
-        JobPosting updatedJob = jobPostingService.updateJobPosting(jobId, jobPostingUpdates);
+        if (principal == null) throw new AccessDeniedException("Authentication required to create job profile.");
+
+        JobPosting updatedJob = jobPostingService.updateJobPosting(jobId, jobPostingUpdates,  principal);
 
         ResponseMessage responseMessage = ResponseMessage.builder()
                 .message("Job post updated successfully")

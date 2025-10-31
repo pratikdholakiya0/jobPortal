@@ -11,4 +11,6 @@ public interface ApplicationActivityRepository extends MongoRepository<Applicati
     List<ApplicationActivity> findAllByApplicationId(String applicationId);
 
     List<ApplicationActivity> findAllByApplicationIdOrderByTimestampDesc(String applicationId);
+
+    List<ApplicationActivity> findAllByApplicationIdOrderByTimestampAsc(String applicationId);
 }
